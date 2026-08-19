@@ -38,7 +38,39 @@ select = ["E", "F", "I", "B", "UP", "SIM", "S"]
 uv run ruff check .
 uv run ruff check . --fix
 
-# ==== Ruff end ==== 
+# ---------------------------
+
+uv run ruff format .
+# застосовує зміни.
+
+uv run ruff format --check .
+# нічого не змінює, тільки перевіряє й повертає код виходу 1/0
+
+uv run ruff format --diff .
+# показує, що б змінилось, без застосування
+
+і в pyproject.toml — секції:
+[tool.ruff.format]
+quote-style = "double"
+
+# ==== Mypy ==== 
+
+uv add --dev mypy
+
+і в pyproject.toml — секції:
+[tool.mypy]
+python_version = "3.13"
+strict = true
+disallow_untyped_defs = true
+warn_unused_ignores = true
+warn_return_any = true
+
+uv run mypy src/
+
+# ==== pip-audit ==== 
+
+uv add --dev pip-audit
+uv run pip-audit
 
 # File run ex.
 
