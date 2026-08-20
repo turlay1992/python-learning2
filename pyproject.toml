@@ -22,6 +22,7 @@ build-backend = "uv_build"
 dev = [
     "mypy>=2.3.1",
     "pip-audit>=2.10.1",
+    "pre-commit>=4.6.2",
     "pytest>=9.1.1",
     "ruff>=0.16.3",
 ]
@@ -31,7 +32,12 @@ line-length = 100
 target-version = "py313"
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "B", "UP", "SIM", "S"]
+select = ["E", "F", "I", "B", "UP", "SIM", "S", "T20"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S101"]
+"src/python_learning2/exceptions/examples.py" = ["T20"]
+"src/python_learning2/__init__.py" = ["T20"]
 
 [tool.ruff.format]
 quote-style = "double"

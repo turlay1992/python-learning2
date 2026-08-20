@@ -1,100 +1,190 @@
-# Actions for new app:
-uv python install 3.13
-# Встанови менеджер версій:
+# Python Project: Creation and Deployment
 
-uv python pin 3.13
-# Запінити її на Python 3.13
+A Python project template demonstrating reproducible project setup, development tooling, quality checks, testing, and application execution with `uv`.
 
-uv init --package  
-# --package - Created with tree structure (not flat). tree - Захист від "випадкового" імпорту
+## Prerequisites
 
-uv add httpx
-uv add --dev pytest 
-# adding some dependencies
+Before cloning the repository, install:
 
+* Git
+* `uv` — use the project-compatible version specified by the team/environment.
+
+The repository already contains a `.python-version` file. You **do not need to install Python manually**: `uv` will detect the required Python version and install/use it when setting up the project.
+
+Verify `uv`:
+
+```bash
+uv --version
+```
+
+## Setup
+
+Clone the repository and enter the project directory:
+
+```bash
+git clone <repository-url>
+cd <project-directory>
+```
+
+Synchronize the project environment:
+
+```bash
 uv sync
+```
 
-uv run python -c "import httpx; print(httpx.__version__)"
+`uv sync` uses the existing `uv.lock` file to create/update `.venv` with the exact dependency versions defined by the lock file, including transitive dependencies.
 
-uv run python -c "import python_learning2; python_learning2.main()"
-# має вивести те саме повідомлення main.py
+No manual virtual-environment activation is required when using `uv run`.
 
-uv run 
+## Running the App
 
-# ==============================
+The project provides an entry point through `[project.scripts]`. Run the application with:
 
-# ==== Ruff ==== 
-uv add --dev ruff
+```bash
+uv run <project-command>
+```
 
-і в pyproject.toml — секції:
+You can also run individual modules directly with Python's `-m` option:
 
-[tool.ruff]
-line-length = 100
-target-version = "py313"
+```bash
+uv run python -m <package>.<module>
+```
 
-[tool.ruff.lint]
-select = ["E", "F", "I", "B", "UP", "SIM", "S"]
+For example:
 
+```bash
+uv run python -m python_learning2.cloude_tasks.class_methods
+```
+
+`uv run` executes commands inside the project's managed environment, ensuring that the correct Python interpreter and dependencies are used.
+
+## Development Workflow
+
+Run the following quality gates before committing changes.
+
+### Ruff — linting
+
+Check the code:
+
+```bash
 uv run ruff check .
+```
+
+Automatically apply available fixes:
+
+```bash
 uv run ruff check . --fix
+```
 
-# ---------------------------
+### Ruff — formatting
 
+Format the project:
+
+```bash
 uv run ruff format .
-# застосовує зміни.
+```
 
+Check formatting without modifying files:
+
+```bash
 uv run ruff format --check .
-# нічого не змінює, тільки перевіряє й повертає код виходу 1/0
+```
 
+Preview formatting changes:
+
+```bash
 uv run ruff format --diff .
-# показує, що б змінилось, без застосування
+```
 
-і в pyproject.toml — секції:
-[tool.ruff.format]
-quote-style = "double"
+### Mypy — static type checking
 
-# ==== Mypy ==== 
+Run strict type checking:
 
-uv add --dev mypy
+```bash
+uv run mypy src tests
+```
 
-і в pyproject.toml — секції:
-[tool.mypy]
-python_version = "3.13"
-strict = true
-disallow_untyped_defs = true
-warn_unused_ignores = true
-warn_return_any = true
+### pip-audit — dependency security audit
 
-uv run mypy src/
+Check project dependencies for known security vulnerabilities:
 
-# ==== pip-audit ==== 
-
-uv add --dev pip-audit
+```bash
 uv run pip-audit
+```
 
-# File run ex.
+### Pytest — tests
 
-uv run python -m python_learning2.cloude_tasks.class_methods 
+Run the test suite:
 
-# ==== 
+```bash
+uv run pytest
+```
 
+### Quality-gate checklist
 
-uv init 
-# створює скелет проєкту. Команда генерує pyproject.toml, базовий пакет (з src/-layout або плаский, залежно від флагів), і якщо в директорії вже є .git/.python-version — підхоплює їх, а не перезатирає.
+Before committing:
 
-# uv add/uv sync/uv lock — це і є дисципліна лок-файлу
+```text
+uv run ruff check .
+uv run ruff format --check .
+uv run mypy src tests
+uv run pip-audit
+uv run pytest
+```
 
-uv add httpx 
-# дописує залежність у [project.dependencies] файлу pyproject.toml і одразу оновлює uv.lock. 
+## Pre-commit Hooks
 
-uv add --dev pytest 
-# робить те саме, але в групу дев-залежностей. 
+The repository already contains the pre-commit configuration:
 
-uv sync 
-# встановлює віртуальне середовище (.venv) так, щоб воно точно відповідало лок-файлу — не "приблизно та версія", а рівно та, аж до кожної транзитивної залежності. 
+```text
+.pre-commit-config.yaml
+```
 
-uv lock 
-# перегенерує лок-файл із поточних обмежень у pyproject.toml, не торкаючись самого середовища. 
+Nothing needs to be created manually.
 
-uv run 
-# команда виконує команду всередині проєктного середовища без ручної активації — це прибирає цілий клас багів типу "забув activate venv, і запустилось не тим Python".
+Install the Git hooks:
+
+```bash
+uv run pre-commit install
+```
+
+Run all configured hooks against the entire repository:
+
+```bash
+uv run pre-commit run --all-files
+```
+
+After installation, the hooks will also run automatically against staged files during `git commit`.
+
+## Editor Setup
+
+The project contains a ready-to-use VS Code configuration:
+
+```text
+.vscode/settings.json
+```
+
+No manual configuration is required. Open the project directory in VS Code and the repository settings will be applied automatically.
+
+Recommended extensions:
+
+* **Python** — Microsoft
+* **Pylance** — Microsoft
+* **Ruff** — Ruff
+
+The project is configured to use Ruff as the Python formatter and to apply Ruff code actions when explicitly requested.
+
+## Logging
+
+The application uses Python's standard `logging` module.
+
+The logging level is controlled through the `LOG_LEVEL` environment variable. If the variable is not specified, the default level is `INFO`.
+
+For example, in PowerShell:
+
+```powershell
+$env:LOG_LEVEL="DEBUG"
+uv run python -m python_learning2.cloude_tasks.class_methods
+```
+
+This allows the logging verbosity to be changed without modifying the source code.

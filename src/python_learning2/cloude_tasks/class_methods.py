@@ -1,7 +1,15 @@
 # from itertools import zip_longest
+import logging
+import os
 from pathlib import Path
 
 from python_learning2.exceptions.examples import InsufficientFundsError, InvalidAmountError
+
+logging.basicConfig(
+    level=os.environ.get("LOG_LEVEL", "INFO"),
+    format="%(asctime)s %(name)s %(levelname)s %(message)s",
+)
+logger = logging.getLogger(__name__)
 
 
 class BankAccount:
@@ -82,6 +90,7 @@ class BankAccount:
         if amount <= 0:
             raise InvalidAmountError()
 
+        logger.debug(f"Провалідоване значення: {amount}")
         return amount
 
 
@@ -137,15 +146,15 @@ if __name__ == "__main__":
         first_acc.deposit(5)
         first_acc.withdraw(30)
     except InsufficientFundsError as e:
-        print(f"Помилка: {e}")
+        logger.exception(e)
     except InvalidAmountError as e:
-        print(f"Помилка: {e}")
+        logger.exception(e)
     except RuntimeError as e:
-        print(f"Невідома помилка: {e}")
+        logger.exception(f"Невідома помилка: {e}")
     else:
-        print("Операція успішна!")
+        logger.info("Операція успішна!")
     finally:
-        print("Операція оброблена!")
+        logger.info("Операція оброблена!")
 
     # second_acc = BankAccount.from_zero("Olena")
     # second_acc.deposit(20)
